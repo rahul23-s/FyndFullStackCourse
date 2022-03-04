@@ -1,10 +1,37 @@
-console.log("This is coming from the nodeJs which is a javascript runtime!");
-const http = require("http");
+const express = require("express");
+const app = express();
+const userRouter = require("../");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
-http
-  .createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.write("This is coming from the server we created!");
-    res.end();
+const dbURL =
+  "mongodb+srv://rahul-23s:xou96VyfmHifLXq7@cluster0.zhgal.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+
+//Connecting with Mongodb
+mongoose
+  .connect(dbURL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
-  .listen(8080);
+  .then(() => {
+    console.log("MongoDB is connected!");
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+//configuring body parser (Accepts the body values from req and parses it)
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+//configure morgan (Logger)
+app.use(morgan("dev"));
+
+app.get("/", (req, res, next) => {
+  res.json("This is working on / request!");
+});
+
+app.use("/users", userRouter);
+
+module.exports = app;
